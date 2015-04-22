@@ -112,7 +112,7 @@ class SiteController extends Controller {
                 'Message' => 'No data',
             ];
             echo json_encode($rs);
-        }        
+        }
     }
 
     public function actionGlobalQsMng() {
@@ -189,16 +189,21 @@ class SiteController extends Controller {
     }
 
     public function actionGetQuestion() {
-        $userid = $_REQUEST['userid'];
-        $globalQs = Question::find()->where(['type' => 'global', 'status' => 1])->one();
-        $officeQs = Question::find()->where(['user_id' => $userid, 'status' => 1])->one();
         $rs = [
-            'Result' => true,
-            'Questions' => [
-                ['ServerId' => $globalQs->id, 'Question' => $globalQs->question, 'type' => $globalQs->type],
-                ['ServerId' => $officeQs->id, 'Question' => $officeQs->question, 'type' => $officeQs->type],
-            ],
+            'Result' => false,
+            'Questions' => []
         ];
+        if ((isset($_REQUEST['userid'])) && (!empty($_REQUEST['userid']))) {
+            $userid = $_REQUEST['userid'];
+            $Qss = Question::find()->where(['user_id' => [1, $userid], 'status' => 1])->all();
+
+            if (!empty($Qss)) {
+                $rs['Result'] = true;
+                foreach ($Qss as $qs) {
+                    $rs['Questions'][] = ['ServerId' => $qs->id, 'Question' => $qs->question, 'type' => $qs->type];
+                }
+            }
+        }
         echo json_encode($rs);
     }
 
